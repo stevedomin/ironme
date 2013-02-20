@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	port        = flag.Int("p", 4000, "Server port")
-	path string = "."
+	port                 = flag.Int("p", 4000, "Server port")
+	singlePageApp        = flag.Bool("-s", true, "Server port")
+	path          string = "."
 )
 
 func main() {
@@ -50,6 +51,19 @@ func main() {
 	pipeline.Upstream.PushBack(&coffee_file.Filter{
 		BasePath: path,
 	})
+
+	if *singlePageApp {
+		// Serve index.html no matter what
+		pipeline.Upstream.PushBack(falcore.NewRequestFilter(func(req *falcore.Request) *http.Response {
+			req.HttpRequest.URL.Path = "/index.html"
+			return nil
+		}))
+
+		// Rewrite me !
+		pipeline.Upstream.PushBack(&static_file.Filter{
+			BasePath: path,
+		})
+	}
 
 	// downstream
 	pipeline.Downstream.PushBack(compression.NewFilter(nil))
