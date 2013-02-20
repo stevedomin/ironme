@@ -1,13 +1,13 @@
 package main
 
 import (
-	"./coffee_file"
-	"./sass_file"
-	"./static_file"
 	"flag"
 	"fmt"
 	"github.com/ngmoco/falcore"
 	"github.com/ngmoco/falcore/compression"
+	"github.com/stevedomin/ironme/coffee_file"
+	"github.com/stevedomin/ironme/sass_file"
+	"github.com/stevedomin/ironme/static_file"
 	"net/http"
 )
 
