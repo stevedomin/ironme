@@ -63,7 +63,7 @@ func (f *Filter) FilterRequest(req *falcore.Request) (res *http.Response) {
 		if stat, err := file.Stat(); err == nil && stat.Mode()&os.ModeType == 0 {
 			css, err := sc.CompileFile(asset_path)
 			if err != nil {
-				falcore.Error("Can't compile SASS file : %v", asset_path)
+				falcore.Error("%v", err)
 				return
 			}
 
