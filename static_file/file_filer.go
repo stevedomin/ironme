@@ -60,8 +60,7 @@ func (f *Filter) FilterRequest(req *falcore.Request) (res *http.Response) {
 		} else {
 			file.Close()
 		}
-	} else {
-		falcore.Finest("Can't open %v: %v", asset_path, err)
 	}
+
 	return
 }
