@@ -3,11 +3,11 @@ package sass_file
 import (
 	"bytes"
 	"github.com/ngmoco/falcore"
-	"github.com/suapapa/go_sass"
 	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -20,8 +20,6 @@ type Filter struct {
 	// Prefix in URL path
 	PathPrefix string
 }
-
-var sc sass.Compiler
 
 func (f *Filter) FilterRequest(req *falcore.Request) (res *http.Response) {
 	// Clean asset path
@@ -61,11 +59,15 @@ func (f *Filter) FilterRequest(req *falcore.Request) (res *http.Response) {
 	if file, err := os.Open(asset_path); err == nil {
 		// Make sure it's an actual file
 		if stat, err := file.Stat(); err == nil && stat.Mode()&os.ModeType == 0 {
-			css, err := sc.CompileFile(asset_path)
+			cmd := exec.Command("sass", "--scss", asset_path)
+			var out bytes.Buffer
+			cmd.Stdout = &out
+			err = cmd.Run()
 			if err != nil {
-				falcore.Error("%v", err)
+				falcore.Error("Can't compile SCSS file : %v", asset_path)
 				return
 			}
+			css := out.String()
 
 			res = &http.Response{
 				Request:       req.HttpRequest,
@@ -79,6 +81,25 @@ func (f *Filter) FilterRequest(req *falcore.Request) (res *http.Response) {
 			}
 
 			res.Header.Set("Content-Type", mime.TypeByExtension(".css"))
+
+			// css, err := sc.CompileFile(asset_path)
+			// if err != nil {
+			// 	falcore.Error("%v", err)
+			// 	return
+			// }
+
+			// res = &http.Response{
+			// 	Request:       req.HttpRequest,
+			// 	StatusCode:    200,
+			// 	Proto:         "HTTP/1.1",
+			// 	ProtoMajor:    1,
+			// 	ProtoMinor:    1,
+			// 	Body:          ioutil.NopCloser(bytes.NewBufferString(css)),
+			// 	Header:        make(http.Header),
+			// 	ContentLength: int64(len(css)),
+			// }
+
+			// res.Header.Set("Content-Type", mime.TypeByExtension(".css"))
 
 		} else {
 			file.Close()
